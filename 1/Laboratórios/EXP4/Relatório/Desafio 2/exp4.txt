@@ -1,0 +1,324 @@
+module exp4_fluxo_dados (
+    input        clock,
+    input        zeraC,
+    input        contaC,
+    input        zeraR,
+    input reset,
+    input        registrarR,
+    input zera_s_timeout,
+    input  [3:0] chaves,
+    input modo,
+    input registra_modo,
+    output       igual,
+    output       fimC,
+    output       jogada_feita,      // pulso do edge_detector
+    output       db_tem_jogada,     // saída da porta OR
+    output db_enable_timeout,
+    output [3:0] db_contagem,
+    output [3:0] db_memoria,
+    output timeout,
+    output [3:0] db_jogada,
+    output db_modo,
+    output fim_4_jogadas,
+    output chaveada
+);
+    wire [3:0] s_endereco;
+    wire [3:0] s_dado, s_chaves;
+    wire       s_tem_jogada;
+    wire enable_timeout;
+    reg s_modo;
+    reg s_chaveada;
+
+    // porta OR para detectar se qualquer chave foi pressionada
+    assign s_tem_jogada = |chaves; 
+    assign db_tem_jogada = s_tem_jogada;
+    // enable timeout quando nao tem jogada
+    assign enable_timeout = ~s_tem_jogada;
+    assign db_enable_timeout = enable_timeout;
+
+    // captura modo quando registra_modo = 1
+    always @(posedge clock or posedge reset) begin
+        if (reset)
+            s_modo <= 1'b0;
+        else if (registra_modo)
+            s_modo <= modo;
+    end
+
+    always @(posedge clock or posedge reset) begin
+        if (reset)
+            s_chaveada <= 1'b0;
+        else if (registra_modo)  // ativa quando registra modo (início do jogo)
+            s_chaveada <= 1'b1;
+    end
+
+    // detector de borda para gerar pulso de 1 clock
+    edge_detector detector (
+        .clock(clock),
+        .reset(reset), // reset global
+        .sinal(s_tem_jogada),
+        .pulso(jogada_feita)
+    );
+
+    contador_m #(
+        .M(3000),
+        .N(12)
+    ) contador_timeout (
+        .clock(clock),
+        .zera_as(1'b0),
+        .zera_s(zera_s_timeout), //sinal proprio de zera s
+        .conta(enable_timeout), //se nao tem jogada
+        .Q(),
+        .fim(timeout),
+        .meio()
+    );
+
+    contador_163 contador (
+        .clock(clock),
+        .clr(~zeraC),
+        .ld(1'b1),
+        .ent(1'b1),
+        .enp(contaC),
+        .D(4'b0000),
+        .Q(s_endereco),
+        .rco(fimC)
+    );
+
+    comparador_85 comparador (
+        .A(s_dado),
+        .B(s_chaves),
+        .ALBi(1'b0), .AGBi(1'b0), .AEBi(1'b1),
+        .AEBo(igual)
+    );
+
+    registrador_4 registrador (
+        .clock(clock),
+        .clear(zeraR),
+        .enable(registrarR),
+        .D(chaves),
+        .Q(s_chaves)
+    );
+
+    sync_rom_16x4 memoria (
+        .clock(clock),
+        .address(s_endereco),
+        .data_out(s_dado)
+    );
+
+    assign db_contagem = s_endereco;
+    assign db_jogada   = s_chaves;
+    assign db_memoria  = s_dado;
+    assign db_zera_s_timeout = zera_s_timeout;  // debug
+    assign db_modo = s_modo;
+    assign fim_4_jogadas = (s_endereco == 4'b0011);  // fim após 4 jogadas (contagem 0-3)
+    assign chaveada = s_chaveada;
+
+endmodule
+
+
+
+module exp4_unidade_controle (
+    input      clock,
+    input      reset,
+    input      iniciar,
+    input      fim,
+    input      fim_4_jogadas,
+    input      modo,
+    input      jogada,    // pulso jogada_feita do FD
+    input      igual,
+    input timeout,
+    output reg zerac,
+    output reg contac,
+    output reg zeraR,
+    output reg registrarR,
+    output reg registra_modo,
+    output reg acertou,
+    output reg errou,
+    output reg pronto,
+    output reg [3:0] db_estado,
+    output reg db_timeout,
+    output reg zera_s_timeout
+);
+
+    reg [3:0] Eatual, Eprox;
+
+    // estados
+    parameter inicial      = 4'b0000; // inicial = 0
+    parameter aguarda_modo = 4'b1000; // aguarda_modo = 8
+    parameter preparacao   = 4'b0001; // preparacao = 1
+    parameter espera       = 4'b0010; // espera =  2
+    parameter registra     = 4'b0011; // registra = 3
+    parameter comparacao   = 4'b0100; // comparacao = 4
+    parameter proximo      = 4'b0101; // proximo = 5
+    parameter final_acerto = 4'b0110; // acertou = 6
+    parameter final_erro   = 4'b0111; // errou = 7 
+    parameter final_timeout = 4'b1111; // timeout = F
+
+    always @(posedge clock or posedge reset) begin
+        if (reset) Eatual <= inicial;
+        else Eatual <= Eprox;
+    end
+
+    always @* begin
+        case (Eatual)
+            inicial:    Eprox = iniciar ? aguarda_modo : inicial;
+            aguarda_modo: Eprox = preparacao;
+            preparacao: Eprox = espera;
+            espera:     if (timeout) Eprox = final_timeout; // vai pro timeout
+                        else Eprox = jogada ? registra : espera; 
+            registra:   Eprox = comparacao;
+            comparacao: if (!igual) Eprox = final_erro;
+                        else if (modo == 1'b0) Eprox = fim ? final_acerto : proximo;  // modo=0: 16 jogadas
+                        else Eprox = fim_4_jogadas ? final_acerto : proximo;  // modo=1: 4 jogadas
+            proximo:    Eprox = espera;
+            final_acerto: Eprox = iniciar ? aguarda_modo : final_acerto;
+            final_erro:   Eprox = iniciar ? aguarda_modo : final_erro;
+            final_timeout: Eprox = iniciar ? aguarda_modo : final_timeout;
+            default:    Eprox = inicial;
+        endcase
+    end
+
+    always @* begin
+        // sinais de controle
+        zerac      = (Eatual == preparacao);
+        zeraR      = (Eatual == preparacao);
+        registrarR = (Eatual == registra);
+        contac     = (Eatual == proximo);
+        registra_modo = (Eatual == aguarda_modo);
+
+        //sinal zera s para  preparacao e a cada jogada
+        zera_s_timeout = (Eatual == preparacao || Eatual == proximo);
+        
+        // sinais de status
+        acertou    = (Eatual == final_acerto);
+        errou      = (Eatual == final_erro);
+        pronto     = (Eatual == final_timeout || Eatual == final_acerto || Eatual == final_erro);
+        
+        db_estado  = Eatual;
+        db_timeout = (Eatual == final_timeout);
+    end
+endmodule
+
+
+
+module circuito_exp4(
+    input clock,
+    input reset,
+    input iniciar,
+    input [3:0] chaves,
+    input modo,
+    output acertou,
+    output errou,
+    output pronto,
+    output [3:0] leds,
+    output db_igual,
+    output [6:0] db_contagem,
+    output [6:0] db_memoria,
+    output [6:0] db_estado,
+    output [6:0] db_jogadafeita,
+    output db_clock,
+    output db_iniciar,
+	output db_zerac,
+	output db_contac,
+	output db_fimc,
+	output db_zerar,
+	output db_registrar,
+    output db_timeout,
+    output db_tem_jogada,
+    output db_enable_timeout,
+    output db_zera_s_timeout,
+    output db_modo,
+    output chaveada
+);
+
+wire zeraC, zeraR, registraR, contaC, fimC, igual, tem_jogada, jogada_feita, timeout, enable_timeout, zera_s_timeout;
+wire registra_modo, fim_4_jogadas, s_modo;
+wire [6:0] hexa0, hexa1, hexa2, hexa3;
+wire [3:0] s_contagem, s_memoria, s_estado, s_jogada;
+
+exp4_fluxo_dados fluxo_dados(
+    .clock(clock),
+    .reset(reset),
+    .chaves(chaves),
+    .modo(modo),
+    .zeraR(zeraR),
+    .registrarR(registraR),
+    .contaC(contaC),
+    .zeraC(zeraC),
+    .registra_modo(registra_modo),
+    .igual(igual),
+    .fimC(fimC),
+    .fim_4_jogadas(fim_4_jogadas),
+    .db_contagem(s_contagem),
+    .db_jogada(s_jogada),
+    .db_memoria(s_memoria),
+    .jogada_feita(jogada_feita),
+    .db_tem_jogada(tem_jogada),
+    .db_enable_timeout(enable_timeout),
+    .timeout(timeout),
+    .zera_s_timeout(zera_s_timeout),
+    .db_modo(s_modo),
+    .chaveada(chaveada)
+);
+
+exp4_unidade_controle unidade_controle(
+    .clock(clock),
+    .reset(reset),
+    .iniciar(iniciar),
+    .fim(fimC),
+    .fim_4_jogadas(fim_4_jogadas),
+    .modo(s_modo),
+    .jogada(jogada_feita),
+    .igual(igual),
+    .zerac(zeraC),
+    .contac(contaC),
+    .zeraR(zeraR),
+    .registrarR(registraR),
+    .registra_modo(registra_modo),
+    .pronto(pronto),
+    .db_estado(s_estado),
+    .errou(errou),
+    .acertou(acertou),
+    .zera_s_timeout(zera_s_timeout),
+    .timeout(timeout)
+);
+
+hexa7seg HEX0 (
+    .hexa(s_contagem),
+    .display(hexa0)
+);
+
+hexa7seg HEX1 (
+    .hexa(s_memoria),
+    .display(hexa1)
+);
+
+hexa7seg HEX2 (
+    .hexa(s_jogada),
+    .display(hexa2)
+);
+
+hexa7seg HEX3 (
+    .hexa(s_estado),
+    .display(hexa3)
+);
+
+assign db_iniciar = iniciar;
+assign db_contagem = hexa0;
+assign db_memoria = hexa1;
+assign db_jogadafeita = hexa2;
+assign db_estado = hexa3;
+assign db_zerac = zeraC;
+assign db_contac = contaC;
+assign db_fimc = fimC;
+assign db_zerar = zeraR;
+assign db_registrar = registraR;
+assign db_igual = igual;
+assign db_tem_jogada = tem_jogada;
+assign db_clock = clock;
+assign leds = s_memoria;
+assign db_enable_timeout = enable_timeout;
+assign db_timeout = timeout;
+assign db_zera_s_timeout = zera_s_timeout;
+assign db_modo = s_modo;
+
+endmodule

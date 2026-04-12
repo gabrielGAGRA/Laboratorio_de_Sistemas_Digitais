@@ -1,0 +1,178 @@
+$date
+	Tue Mar 31 00:01:18 2026
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ns
+$end
+$scope module tb_unidade_controle $end
+$var wire 1 ! zera_endereco $end
+$var wire 1 " modo_aprendizado $end
+$var wire 5 # estado_hex [4:0] $end
+$var wire 1 $ conta_endereco $end
+$var reg 1 % acerto_nota $end
+$var reg 1 & clock $end
+$var reg 1 ' fim_musica $end
+$var reg 1 ( mudou_modo $end
+$var reg 1 ) reset $end
+$var reg 1 * tem_nota_ativa $end
+$scope module dut $end
+$var wire 1 % acerto_nota $end
+$var wire 1 & clock $end
+$var wire 1 ' fim_musica $end
+$var wire 1 ( mudou_modo $end
+$var wire 1 ) reset $end
+$var wire 1 * tem_nota_ativa $end
+$var parameter 3 + COMPARA_NOTA $end
+$var parameter 3 , ESPERA_NOTA $end
+$var parameter 3 - ESPERA_SOLTAR $end
+$var parameter 3 . FIM_MUSICA_ST $end
+$var parameter 3 / INICIAL $end
+$var parameter 3 0 INICIA_MUSICA $end
+$var parameter 3 1 LIVRE $end
+$var parameter 3 2 PROXIMO $end
+$var reg 1 $ conta_endereco $end
+$var reg 5 3 estado_hex [4:0] $end
+$var reg 1 " modo_aprendizado $end
+$var reg 3 4 next_state [2:0] $end
+$var reg 3 5 state [2:0] $end
+$var reg 1 ! zera_endereco $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+b101 2
+b1 1
+b10 0
+b0 /
+b111 .
+b110 -
+b11 ,
+b100 +
+$end
+#0
+$dumpvars
+b0 5
+b1 4
+b0 3
+0*
+1)
+0(
+0'
+0&
+0%
+0$
+b0 #
+0"
+1!
+$end
+#10
+1&
+#20
+0&
+#25
+0)
+#30
+1!
+b1 5
+1&
+#40
+0&
+#45
+b10 4
+1!
+1(
+#50
+b11 4
+b10 #
+b10 3
+1"
+1!
+b10 5
+1&
+#60
+0&
+#65
+b10 #
+b10 3
+1!
+1"
+b11 4
+0(
+#70
+b10 #
+b10 3
+0!
+1"
+b11 5
+1&
+#80
+0&
+#85
+b100 4
+b10 #
+b10 3
+1"
+1*
+#90
+b10 #
+b10 3
+1"
+b100 5
+1&
+#100
+0&
+#105
+b101 4
+b10 #
+b10 3
+1"
+1%
+#110
+b110 4
+1$
+b100 #
+b100 3
+1"
+b101 5
+1&
+#120
+0&
+#130
+b101 #
+b101 3
+0$
+1"
+b110 5
+1&
+#140
+0&
+#145
+b11 4
+b101 #
+b101 3
+1"
+0%
+0*
+#150
+b10 #
+b10 3
+1"
+b11 5
+1&
+#160
+0&
+#170
+1&
+#180
+0&
+#190
+1&
+#200
+0&
+#210
+1&
+#215

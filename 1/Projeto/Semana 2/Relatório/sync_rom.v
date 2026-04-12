@@ -1,0 +1,25 @@
+// ---------------------------------------------------------------------------
+// Modulo: sync_rom
+// Descricao: ROM Sincrona parametrizavel que le de um arquivo de texto.
+// ---------------------------------------------------------------------------
+module sync_rom #(
+    parameter DATA_WIDTH = 4,
+    parameter ADDR_WIDTH = 8,
+    parameter INIT_FILE = "au_clair_de_la_lune.txt"
+)(
+    input  wire clock,
+    input  wire [ADDR_WIDTH-1:0] address,
+    output reg  [DATA_WIDTH-1:0] data_out
+);
+
+    reg [DATA_WIDTH-1:0] rom [0:(2**ADDR_WIDTH)-1];
+
+    initial begin
+        $readmemb(INIT_FILE, rom);
+    end
+
+    always @(posedge clock) begin
+        data_out <= rom[address];
+    end
+
+endmodule

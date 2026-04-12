@@ -1,0 +1,371 @@
+module fluxo_dados (
+    input        clock,
+    input        zera_endereco,
+    input        conta_endereco,
+    input        zera_limite,      
+    input        conta_limite,     
+    input        zeraR,
+    input        reset,
+    input        registrarR,
+    input        zera_s_timeout,
+    input        enable_timeout,
+    input  [3:0] botoes,           
+    input        modo,
+    input        registra_modo,
+    input        zera_modo,
+    output       igual,
+    output       fim_jogo,         // Fim total (ganhou)
+    output       enderecoIgualLimite, // Fim da rodada atual
+    output       jogada_feita,
+    output       db_tem_jogada,
+    output       db_enable_timeout,
+    output [3:0] db_contagem,
+    output [3:0] db_memoria,
+    output [3:0] db_limite,
+    output       timeout,
+    output [3:0] db_jogada,
+    output       db_modo,
+    output       chavesIgualMemoria 
+);
+    wire [3:0] s_endereco;
+    wire [3:0] s_dado, s_botoes; 
+    wire [3:0] s_limite;
+    wire [3:0] s_jogo_limite;
+    wire       s_tem_jogada;
+    wire       s_modo;
+    
+    assign s_tem_jogada = |botoes; 
+    assign db_tem_jogada = s_tem_jogada;
+    assign db_enable_timeout = enable_timeout;
+
+    // Registrador de modo
+    registrador_1 reg_modo (
+        .clock(clock),
+        .clear(zera_modo),
+        .enable(registra_modo),
+        .D(modo),
+        .Q(s_modo)
+    );
+
+    // Fim de rodada
+    assign s_jogo_limite = (s_modo == 1'b0) ? 4'b1111 : 4'b0011;
+
+    comparador_85 compFimRodada (
+        .A(s_endereco),
+        .B(s_limite),
+        .ALBi(1'b0), .AGBi(1'b0), .AEBi(1'b1),
+        .AEBo(enderecoIgualLimite),
+        .ALBo(), .AGBo()
+    );
+
+    comparador_85 compFimJogo (
+        .A(s_limite),
+        .B(s_jogo_limite),
+        .ALBi(1'b0), .AGBi(1'b0), .AEBi(1'b1),
+        .AEBo(fim_jogo),
+        .ALBo(), .AGBo()
+    );
+   
+    edge_detector detector (
+        .clock(clock),
+        .reset(reset),
+        .sinal(s_tem_jogada),
+        .pulso(jogada_feita)
+    );
+
+    contador_m #(
+        .M(3000),
+        .N(13)
+    ) contador_timeout (
+        .clock(clock),
+        .zera_as(reset), 
+        .zera_s(zera_s_timeout),
+        .conta(enable_timeout),
+        .Q(),
+        .fim(timeout),
+        .meio()
+    );
+
+    // Contador da sequência 
+    contador_163 contador_addr (
+        .clock(clock),
+        .clr(~zera_endereco),
+        .ld(1'b1),
+        .ent(1'b1),
+        .enp(conta_endereco),
+        .D(4'b0000),
+        .Q(s_endereco),
+        .rco() 
+    );
+
+    // Contador de rodadas
+    contador_163 contLmt (
+        .clock(clock),
+        .clr(~zera_limite),
+        .ld(1'b1),
+        .ent(1'b1),
+        .enp(conta_limite),
+        .D(4'b0000),
+        .Q(s_limite),
+        .rco() 
+    );
+
+    comparador_85 comparador (
+        .A(s_dado),
+        .B(s_botoes),
+        .ALBi(1'b0), .AGBi(1'b0), .AEBi(1'b1),
+        .AEBo(igual)
+    );
+
+    registrador_4 registrador (
+        .clock(clock),
+        .clear(zeraR),
+        .enable(registrarR),
+        .D(botoes),
+        .Q(s_botoes)
+    );
+
+    sync_rom_16x4 memoria (
+        .clock(clock),
+        .address(s_endereco),
+        .data_out(s_dado)
+    );
+
+    assign db_contagem = s_endereco;
+    assign db_jogada   = s_botoes;
+    assign db_memoria  = s_dado;
+    assign db_limite   = s_limite;
+    assign db_modo     = s_modo;
+    assign chavesIgualMemoria = igual;
+
+endmodule
+
+module unidade_controle (
+    input      clock,
+    input      reset,
+    input      iniciar,             // jogar
+    input      fim_jogo,            // Limite atingiu o maximo e acabou a sequencia
+    input      enderecoIgualLimite, // Fim da sequencia atual
+    input      jogada,
+    input      igual,
+    input      timeout,
+    output reg zera_endereco,       // Zera contador da sequencia
+    output reg conta_endereco,      // Incrementa contador da sequencia
+    output reg zera_limite,         // Zera contador de rodadas
+    output reg conta_limite,        // Incrementa contador de rodadas
+    output reg zeraR,
+    output reg registrarR,
+    output reg registra_modo,
+    output reg zera_modo,
+    output reg acertou,             // ganhou
+    output reg errou,               // perdeu
+    output reg pronto,
+    output reg [3:0] db_estado,
+    output reg db_timeout,
+    output reg zera_s_timeout,
+    output reg enable_timeout
+);
+
+    reg [3:0] Eatual, Eprox;
+
+    // Definição dos estados
+    parameter inicial        = 4'b0000;
+    parameter preparacao     = 4'b0001;
+    parameter espera         = 4'b0010;
+    parameter registra       = 4'b0011;
+    parameter comparacao     = 4'b0100;
+    parameter proximo        = 4'b0101; // proximo endereco dentro da sequencia
+    parameter final_acerto   = 4'b0110;
+    parameter final_erro     = 4'b0111;
+    parameter proxima_rodada = 4'b1000; // incrementa limite
+    parameter final_timeout  = 4'b1111;
+
+    always @(posedge clock or posedge reset) begin
+        if (reset) Eatual <= inicial;
+        else Eatual <= Eprox;
+    end
+
+    always @* begin
+        case (Eatual)
+            inicial:        Eprox = iniciar ? preparacao : inicial;
+            preparacao:     Eprox = espera;
+            espera:         if (timeout) Eprox = final_timeout;
+                            else Eprox = jogada ? registra : espera;
+            registra:       Eprox = comparacao;
+            comparacao:     begin
+                                if (!igual) 
+                                    Eprox = final_erro;
+                                else begin
+                                    // Se acertou, verifica se terminou a sequencia atual
+                                    if (enderecoIgualLimite) begin
+                                        // Se terminou sequencia, verifica se era a ULTIMA rodada
+                                        if (fim_jogo) Eprox = final_acerto;
+                                        else Eprox = proxima_rodada;
+                                    end else begin
+                                        // Se nao terminou sequencia, vai para proximo item
+                                        Eprox = proximo;
+                                    end
+                                end
+                            end
+            proximo:        Eprox = espera;
+            proxima_rodada: Eprox = espera;
+            final_acerto:   Eprox = iniciar ? preparacao : final_acerto;
+            final_erro:     Eprox = iniciar ? preparacao : final_erro;
+            final_timeout:  Eprox = iniciar ? preparacao : final_timeout;
+            default:        Eprox = inicial;
+        endcase
+    end
+
+    // Sinais de controle do fluxo de dados
+    always @* begin        
+        // Inicio do jogo OU mudanca de rodada
+        zera_endereco = (Eatual == preparacao || Eatual == proxima_rodada);
+
+        // dentro da mesma rodada
+        conta_endereco = (Eatual == proximo);
+        
+        // inicio total do jogo
+        zera_limite = (Eatual == preparacao);
+
+        // passar de rodada
+        conta_limite = (Eatual == proxima_rodada);
+
+        zeraR      = (Eatual == preparacao || Eatual == proxima_rodada || Eatual == proximo); 
+        registrarR = (Eatual == registra);
+
+        // controle do registrador de modo
+        zera_modo     = (Eatual == inicial);
+        registra_modo = (Eatual == preparacao);
+
+        // reseta o timer toda vez que voltamos a esperar uma nova jogada
+        zera_s_timeout = (Eatual == preparacao || Eatual == proximo || Eatual == proxima_rodada || Eatual == inicial);
+        enable_timeout = (Eatual == espera);
+        
+        // sinais de saídas
+        acertou    = (Eatual == final_acerto);
+        errou      = (Eatual == final_erro);
+        pronto     = (Eatual == final_timeout || Eatual == final_acerto || Eatual == final_erro);
+        
+        db_estado  = Eatual;
+        db_timeout = (Eatual == final_timeout);
+    end
+endmodule
+
+module circuito_jogo_sequencias(
+    input        clock,
+    input        reset,
+    input        jogar,     // jogar (iniciar)
+    input        modo,
+    input  [3:0] botoes,
+    input        conf_leds,
+    output [3:0] leds,
+    output       pronto,
+    output       ganhou,    // output ganhou
+    output       perdeu,    // output perdeu
+    output       timeout,
+    //db
+    output       db_igual,
+    output [6:0] db_contagem,
+    output [6:0] db_memoria,
+    output [6:0] db_estado,
+    output [6:0] db_jogadafeita,
+    output       db_clock,
+    output       db_iniciar,
+    output       db_enderecoIgualLimite,
+    output       db_timeout,
+    output       db_modo,
+    output [6:0] db_limite_view // ver a rodada nos displays
+    output [2:0] rgb,
+    wire [2:0] s_rgb;
+);
+
+    wire zera_endereco, conta_endereco, zera_limite, conta_limite;
+    wire zeraR, registraR, igual, tem_jogada, jogada_feita, enable_timeout, zera_s_timeout, s_pulso_timeout;
+    wire registra_modo, zera_modo, s_modo;
+    wire enderecoIgualLimite, fim_jogo;
+    wire [6:0] hexa0, hexa1, hexa2, hexa3, hexa5;
+    wire [3:0] s_contagem, s_memoria, s_estado, s_jogada, s_limite;
+
+    fluxo_dados fluxo_dados(
+        .clock(clock),
+        .reset(reset),
+        .botoes(botoes),
+        .modo(modo),
+        .zeraR(zeraR),
+        .registrarR(registraR),
+        .zera_endereco(zera_endereco),
+        .conta_endereco(conta_endereco),
+        .zera_limite(zera_limite),
+        .conta_limite(conta_limite),
+        .registra_modo(registra_modo),
+        .zera_modo(zera_modo),
+        .enable_timeout(enable_timeout),
+        .zera_s_timeout(zera_s_timeout),
+        .igual(igual),
+        .enderecoIgualLimite(enderecoIgualLimite),
+        .fim_jogo(fim_jogo),
+        .db_contagem(s_contagem),
+        .db_jogada(s_jogada),
+        .db_memoria(s_memoria),
+        .db_limite(s_limite),
+        .jogada_feita(jogada_feita),
+        .db_tem_jogada(tem_jogada),
+        .db_enable_timeout(),
+        .timeout(s_pulso_timeout),
+        .db_modo(s_modo)
+    );
+
+    unidade_controle unidade_controle(
+        .clock(clock),
+        .reset(reset),
+        .iniciar(jogar),              
+        .fim_jogo(fim_jogo),
+        .enderecoIgualLimite(enderecoIgualLimite),
+        .jogada(jogada_feita),
+        .igual(igual),
+        .zera_endereco(zera_endereco),
+        .conta_endereco(conta_endereco),
+        .zera_limite(zera_limite),
+        .conta_limite(conta_limite),
+        .zeraR(zeraR),
+        .registrarR(registraR),
+        .registra_modo(registra_modo),
+        .zera_modo(zera_modo),
+        .pronto(pronto),
+        .db_estado(s_estado),
+        .errou(perdeu),                
+        .acertou(ganhou),              
+        .zera_s_timeout(zera_s_timeout),
+        .timeout(s_pulso_timeout),
+        .db_timeout(timeout),
+        .enable_timeout(enable_timeout)
+    );
+
+    corzinha converter_cor (
+        .codigo(s_memoria),
+        .rgb(s_rgb)
+    );
+
+    hexa7seg HEX0 ( .hexa(s_contagem), .display(hexa0) );
+    hexa7seg HEX1 ( .hexa(s_memoria),  .display(hexa1) );
+    hexa7seg HEX2 ( .hexa(s_jogada),   .display(hexa2) );
+    hexa7seg HEX3 ( .hexa(s_limite),   .display(hexa3) );
+    hexa7seg HEX5 ( .hexa(s_estado),   .display(hexa5) );
+
+    assign db_iniciar = jogar;
+    assign db_contagem = hexa0; 
+    assign db_memoria = hexa1;
+    assign db_jogadafeita = hexa2;
+    assign db_limite_view = hexa3;
+    assign db_estado = hexa5;
+    assign db_enderecoIgualLimite = enderecoIgualLimite; 
+    assign db_igual = igual;
+    assign db_clock = clock;
+    assign leds = s_memoria;
+    assign db_modo = s_modo;
+    assign db_timeout = timeout;
+
+    assign leds = (conf_leds == 1'b0) ? s_memoria : 4'b0000;
+    assign rgb  = (conf_leds == 1'b1) ? s_rgb : 3'b000;
+
+endmodule
