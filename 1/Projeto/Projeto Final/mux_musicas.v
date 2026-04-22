@@ -41,7 +41,7 @@ module mux_musicas (
             4'd29: out = d29;
             4'd30: out = d30;
             4'd31: out = d31;
-				4'd32: out = d32;
+			4'd32: out = d32;
             4'd33: out = d33;
             4'd34: out = d34;
             4'd35: out = d35;

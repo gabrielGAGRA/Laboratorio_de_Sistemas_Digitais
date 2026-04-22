@@ -1,5 +1,0 @@
-1. Adicionar controle de volume: 50%, 75%, 100% com combinacao de clicar dois botoes e aparece porcentagem no HEX
-
-2. Adicionar decaimento de volume
-
-3. Adicionar musicas famosas, musicas completas, pelo menos uma musica com timing certo (repetindo notas seguidas ou uma musica com BPM fixo)
