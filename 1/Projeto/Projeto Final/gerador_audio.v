@@ -8,8 +8,10 @@ module gerador_audio (
     input        reset,
     input [17:0] fim_contagem,  
     input        habilitar,     
+    input  [3:0] nivel_volume,
     output       buzzer
 );
+    
     reg [17:0] contador_freq;
     reg        onda_quadrada;
 
@@ -33,8 +35,10 @@ module gerador_audio (
         end
     end
 
-    // 2. Modulação de Volume (Envelope via PWM de 50kHz)
-    // Clock de 50MHz / 50kHz = 1000 ciclos.
+    // O pico do volume é o duty cycle deslocado 6 bits (multiplicado por 64)
+    wire [9:0] pico_volume = {nivel_volume, 6'b000000};
+
+// 2. Modulação de Volume (Envelope via PWM de 50kHz)
     reg [9:0]  contador_pwm_hf;
     reg [9:0]  volume_atual;
     reg [19:0] timer_envelope;
@@ -49,31 +53,27 @@ module gerador_audio (
         end else begin
             habilitar_antigo <= habilitar;
 
-            // Base de tempo do PWM de volume
             if (contador_pwm_hf >= 10'd1000) 
                 contador_pwm_hf <= 10'd0;
             else 
                 contador_pwm_hf <= contador_pwm_hf + 1'b1;
 
-            // Maquina de Estados Simplificada do Envelope
             if (habilitar && !habilitar_antigo) begin
-                // ATTACK: Nota acabou de ser pressionada. Volume estoura em 100%.
-                volume_atual   <= 10'd1000;
+                // ATTACK: Em vez de fixar em 1000, inicia com o volume master selecionado
+                volume_atual   <= pico_volume; 
                 timer_envelope <= 20'd0;
             end 
             else if (habilitar) begin
-                // DECAY/SUSTAIN: A corda do piano perde energia com o tempo.
+                // DECAY/SUSTAIN
                 timer_envelope <= timer_envelope + 1'b1;
-                // Ajuste "50_000" para mudar o quão rápido o som morre enquanto segura a tecla
                 if (timer_envelope >= 20'd50_000) begin 
                     timer_envelope <= 20'd0;
-                    // Não deixa zerar, mantém um Sustain de 15% para a nota continuar soando
                     if (volume_atual > 10'd150) 
                         volume_atual <= volume_atual - 1'b1;
                 end
             end 
             else begin
-                // RELEASE: Soltou a tecla. O som não corta seco, ele apaga rapidamente.
+                // RELEASE
                 timer_envelope <= timer_envelope + 1'b1;
                 if (timer_envelope >= 20'd10_000) begin
                     timer_envelope <= 20'd0;
@@ -84,7 +84,6 @@ module gerador_audio (
         end
     end
 
-    // O buzzer só apita se a onda da nota estiver em alta E o ciclo de trabalho do PWM de volume permitir
     assign buzzer = onda_quadrada & (contador_pwm_hf < volume_atual);
 
 endmodule

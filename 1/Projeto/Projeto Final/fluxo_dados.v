@@ -193,9 +193,11 @@ module fluxo_dados #(
     );
 
     gerador_audio audio_inst (
-        .clock(clock), .reset(reset),
-        .fim_contagem(s_n_ticks), .habilitar(s_tem_nota_final),
-        .volume_master(estado_vol),
+        .clock(clock), 
+        .reset(reset),
+        .fim_contagem(s_n_ticks), 
+        .habilitar(s_tem_nota_final),
+        .nivel_volume(s_duty_cycle),
         .buzzer(buzzer)
     );
 
