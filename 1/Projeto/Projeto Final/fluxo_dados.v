@@ -43,7 +43,9 @@ module fluxo_dados #(
     output [2:0] oitava_atual,
     output       sustenido_atual,
     output       led_oitava_up,
-    output       led_oitava_down
+    output       led_oitava_down,
+    output [1:0] out_volume,
+    output       mostra_vol
 );
 
     wire [6:0] s_botoes_db;
@@ -75,8 +77,52 @@ module fluxo_dados #(
         .clock(clock), .reset(reset), .in(btn_oitava_down), .out(s_btn_oitava_down_db)
     );
 
-    // Edge Detectors
-    edge_detector ed_modo (.clock(clock), .reset(reset), .sinal(s_btn_modo_db), .pulso(mudou_modo));
+    // --- Lógica de Combinação (MODO + INTENSIDADE) ---
+    wire s_modo_pressed = s_btn_modo_db;
+    reg r_modo_prev;
+    always @(posedge clock) r_modo_prev <= s_modo_pressed;
+    wire s_modo_released = (~s_modo_pressed && r_modo_prev);
+
+    reg combo_ativo;
+    reg flag_funcao_vol;  // 0 = Intensidade LED, 1 = Volume Master
+    reg [1:0] estado_vol; // 0=100%, 1=75%, 2=50%
+    reg [25:0] timer_display_vol;
+
+    always @(posedge clock or posedge reset) begin
+        if (reset) begin
+            combo_ativo <= 0;
+            flag_funcao_vol <= 0;
+            estado_vol <= 0;
+            timer_display_vol <= 0;
+        end else begin
+            // Deteção do Combo: MODO segurado + Clique em INTENSIDADE
+            if (s_modo_pressed && s_btn_intensidade_pulse) begin
+                combo_ativo <= 1;
+                flag_funcao_vol <= ~flag_funcao_vol; // Alterna o alvo do botão
+                timer_display_vol <= 26'd50_000_000; // Display ativo por 1s
+            end else if (~s_modo_pressed) begin
+                combo_ativo <= 0;
+            end
+
+            // Uso do botão de intensidade baseado no modo ativo
+            if (~s_modo_pressed && s_btn_intensidade_pulse) begin
+                if (flag_funcao_vol) begin
+                    // Cicla o volume
+                    if (estado_vol == 2'd2) estado_vol <= 2'd0;
+                    else estado_vol <= estado_vol + 1'b1;
+                    timer_display_vol <= 26'd50_000_000;
+                end
+            end
+
+            if (timer_display_vol > 0) timer_display_vol <= timer_display_vol - 1;
+        end
+    end
+
+    // O Modo só muda quando o botão é solto E se nenhum combo foi acionado
+    assign mudou_modo = s_modo_released && !combo_ativo;
+    
+    assign out_volume = estado_vol;
+    assign mostra_vol = (timer_display_vol > 0);
     
     wire s_btn_musica_pulse;
     edge_detector ed_musica (.clock(clock), .reset(reset), .sinal(s_btn_musica_db), .pulso(s_btn_musica_pulse));
@@ -149,6 +195,7 @@ module fluxo_dados #(
     gerador_audio audio_inst (
         .clock(clock), .reset(reset),
         .fim_contagem(s_n_ticks), .habilitar(s_tem_nota_final),
+        .volume_master(estado_vol),
         .buzzer(buzzer)
     );
 
@@ -222,12 +269,12 @@ module fluxo_dados #(
     assign acerto_nota = s_match_cru;
     assign fim_musica = (modo_ativo == 2'd2) ? cont_fim : (s_nota_esperada == 3'd0);
 
-    // 4. Modulação de LED (PWM)
+    // 4. Modulação de LED (PWM) Atualizada
     reg [2:0] estado_intensidade;
     always @(posedge clock or posedge reset) begin
         if (reset) begin
             estado_intensidade <= 3'd0;
-        end else if (s_btn_intensidade_pulse) begin
+        end else if (s_btn_intensidade_pulse && !flag_funcao_vol && !s_modo_pressed) begin
             if (estado_intensidade == 3'd4) estado_intensidade <= 3'd0;
             else estado_intensidade <= estado_intensidade + 1'b1;
         end

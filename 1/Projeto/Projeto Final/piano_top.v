@@ -47,6 +47,8 @@ module piano_top #(
     wire fd_mudou_musica;
     wire s_pwm_out;
     wire fd_pulso_bpm;
+    wire [1:0] fd_volume;
+    wire fd_mostra_vol;
     
     wire fsm_tecla_pressionada_nivel = |s_db_botoes;
     wire fsm_tecla_pressionada;
@@ -112,7 +114,9 @@ module piano_top #(
         .oitava_atual(s_oitava_atual),
         .sustenido_atual(s_sustenido_atual),
         .led_oitava_up(led_oitava_up),
-        .led_oitava_down(led_oitava_down)
+        .led_oitava_down(led_oitava_down),
+        .out_volume(fd_volume),
+        .mostra_vol(fd_mostra_vol)
     );
 
     // Mapeamento extra de LEDs físicos
@@ -120,32 +124,45 @@ module piano_top #(
 
     // DECODIFICADORES PARA DISPLAYS (RF_STATUS_HEX)
 
-    // HEX5: Modo atual
-    hexa7seg disp5_inst (        .hexa({3'b000, fsm_modo_ativo}),
-        .display(hex5_modo)
-    );
+    // HEX5: Modo atual ou Centena do Volume
+    wire [6:0] hex5_normal;
+    hexa7seg disp5_inst (.hexa({3'b000, fsm_modo_ativo}), .display(hex5_normal));
 
-    // HEX4: Oitava atual / esperada
-    hexa7seg disp4_inst (
-        .hexa({2'b00, s_oitava_atual}), 
-        .display(hex4_oitava)
-    );
+    assign hex5_modo = fd_mostra_vol ?
+                       ((fd_volume == 2'd0) ? 7'h79 : 7'h7F) : // Mostra '1' ou apaga
+                       hex5_normal;
 
-    // HEX3 e HEX2: Índice da música (Dezena e Unidade)
+    // HEX4: Oitava atual ou Dezena do Volume (0, 7, 5)
+    wire [6:0] hex4_normal;
+    hexa7seg disp4_inst (.hexa({2'b00, s_oitava_atual}), .display(hex4_normal));
+
+    assign hex4_oitava = fd_mostra_vol ?
+                         ((fd_volume == 2'd0) ? 7'h40 :  // '0'
+                          (fd_volume == 2'd1) ? 7'h78 :  // '7'
+                                                7'h12) : // '5'
+                         hex4_normal;
+
+    // HEX3: Dezena da Música ou Unidade do Volume (sempre 0 ou 5)
+    wire [6:0] hex3_normal;
     wire [4:0] actual_idx = s_sel_musica;
     // Se modo livre (0), apaga display (5'h1F é default apagado). Se for menor que 10, apaga dezena.
     wire [4:0] dez_idx = (fsm_modo_ativo == 2'd0) ? 5'h1F : ((actual_idx / 10) == 0) ? 5'h1F : (actual_idx / 10);
+    hexa7seg disp3_inst (.hexa(dez_idx), .display(hex3_normal));
+
+    assign hex3_musica_dezena = fd_mostra_vol ?
+                         ((fd_volume == 2'd0) ? 7'h40 :  // '0'
+                          (fd_volume == 2'd1) ? 7'h12 :  // '5'
+                                                7'h40) : // '0'
+                         hex3_normal;
+
+    // HEX2: Unidade da Música ou Letra 'P' (Percentual)
+    wire [6:0] hex2_normal;
     wire [4:0] uni_idx = (fsm_modo_ativo == 2'd0) ? 5'h1F : (actual_idx % 10);
+    hexa7seg disp2_inst (.hexa(uni_idx), .display(hex2_normal));
 
-    hexa7seg disp3_inst (
-        .hexa(dez_idx),
-        .display(hex3_musica_dezena)
-    );
-
-    hexa7seg disp2_inst (
-        .hexa(uni_idx),
-        .display(hex2_musica_unidade)
-    );
+    assign hex2_musica_unidade = fd_mostra_vol ?
+                                 7'h0C : // Letra 'P' ativa em baixo
+                                 hex2_normal;
 
     // HEX1: A nota conectada diretamente no 'leds' da instancia do fluxo_dados
 
