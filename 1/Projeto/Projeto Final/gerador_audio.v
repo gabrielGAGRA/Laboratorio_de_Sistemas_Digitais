@@ -15,7 +15,7 @@ module gerador_audio (
     // 1. Geração da Onda Base (A frequência pura)
     reg [17:0] contador_freq;
     reg        onda_quadrada;
-    wire [17:0] threshold = (fim_contagem >> 1);
+    wire [17:0] threshold = (fim_contagem >> 3); // Desloca 3 bits: Divide por 8 (12.5%)
 
     always @(posedge clock or posedge reset) begin
         if (reset) begin
