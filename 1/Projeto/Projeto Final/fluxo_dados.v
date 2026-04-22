@@ -361,8 +361,8 @@ module fluxo_dados #(
     localparam LOG2_LINHAS_POR_BEAT = 1; 
     wire [31:0] ciclos_reais_linha = ciclos_por_beat >> LOG2_LINHAS_POR_BEAT;
 
-    // Usamos um tempo ABSOLUTO de silencio.
-    localparam CICLOS_SILENCIO_FIXO = 32'd750_000; 
+    // Pulso mínimo (2ms) apenas para resetar o envelope do gerador de áudio
+    localparam CICLOS_SILENCIO_FIXO = 32'd100_000;
 
     always @(posedge clock or posedge reset) begin
         if (reset) begin
