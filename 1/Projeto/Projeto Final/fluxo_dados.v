@@ -77,53 +77,46 @@ module fluxo_dados #(
         .clock(clock), .reset(reset), .in(btn_oitava_down), .out(s_btn_oitava_down_db)
     );
 
-    // --- Lógica de Combinação (MODO + INTENSIDADE) ---
+// --- Lógica de Combinação (MODO + INTENSIDADE) ---
     wire s_modo_pressed = s_btn_modo_db;
     reg r_modo_prev;
     always @(posedge clock) r_modo_prev <= s_modo_pressed;
     wire s_modo_released = (~s_modo_pressed && r_modo_prev);
 
     reg combo_ativo;
-    reg flag_funcao_vol;  // 0 = Intensidade LED, 1 = Volume Master
-    reg [1:0] estado_vol; // 0=100%, 1=75%, 2=50%
+    // 0 = 100%, 1 = 50%, 2 = 25%
+    reg [1:0] estado_vol;
     reg [25:0] timer_display_vol;
 
     always @(posedge clock or posedge reset) begin
         if (reset) begin
             combo_ativo <= 0;
-            flag_funcao_vol <= 0;
             estado_vol <= 0;
             timer_display_vol <= 0;
         end else begin
-            // Deteção do Combo: MODO segurado + Clique em INTENSIDADE
+            // Se está a SEGURAR o MODO e clica na INTENSIDADE (Comportamento Shift)
             if (s_modo_pressed && s_btn_intensidade_pulse) begin
-                combo_ativo <= 1;
-                flag_funcao_vol <= ~flag_funcao_vol; // Alterna o alvo do botão
+                combo_ativo <= 1; // Regista que o combo foi usado
                 timer_display_vol <= 26'd50_000_000; // Display ativo por 1s
-            end else if (~s_modo_pressed) begin
+                
+                // Cicla o volume (0, 1, 2)
+                if (estado_vol == 2'd2) estado_vol <= 2'd0;
+                else estado_vol <= estado_vol + 1'b1;
+            end 
+            // Quando solta o botão modo, limpa a flag do combo
+            else if (~s_modo_pressed) begin
                 combo_ativo <= 0;
-            end
-
-            // Uso do botão de intensidade baseado no modo ativo
-            if (~s_modo_pressed && s_btn_intensidade_pulse) begin
-                if (flag_funcao_vol) begin
-                    // Cicla o volume
-                    if (estado_vol == 2'd2) estado_vol <= 2'd0;
-                    else estado_vol <= estado_vol + 1'b1;
-                    timer_display_vol <= 26'd50_000_000;
-                end
             end
 
             if (timer_display_vol > 0) timer_display_vol <= timer_display_vol - 1;
         end
     end
 
-    // O Modo só muda quando o botão é solto E se nenhum combo foi acionado
+    // O Modo só muda quando o botão é SOLTO E se não tiver sido usado como Shift
     assign mudou_modo = s_modo_released && !combo_ativo;
-    
     assign out_volume = estado_vol;
     assign mostra_vol = (timer_display_vol > 0);
-    
+
     wire s_btn_musica_pulse;
     edge_detector ed_musica (.clock(clock), .reset(reset), .sinal(s_btn_musica_db), .pulso(s_btn_musica_pulse));
     assign mudou_musica = s_btn_musica_pulse;
@@ -192,12 +185,23 @@ module fluxo_dados #(
         .n_ticks(s_n_ticks)
     );
 
+    // Descodificador: Traduz o estado 0,1,2 num valor 4-bits para o multiplicador do Áudio
+    reg [3:0] s_nivel_volume;
+    always @(*) begin
+        case (estado_vol)
+            2'd0: s_nivel_volume = 4'hF; // Volume Máximo (15)
+            2'd1: s_nivel_volume = 4'h8; // Volume Médio (~50%)
+            2'd2: s_nivel_volume = 4'h4; // Volume Baixo (~25%)
+            default: s_nivel_volume = 4'hF;
+        endcase
+    end
+
     gerador_audio audio_inst (
         .clock(clock), 
         .reset(reset),
         .fim_contagem(s_n_ticks), 
         .habilitar(s_tem_nota_final),
-        .nivel_volume(s_duty_cycle),
+        .nivel_volume(s_nivel_volume),
         .buzzer(buzzer)
     );
 
@@ -310,12 +314,13 @@ module fluxo_dados #(
     always @(posedge clock or posedge reset) begin
         if (reset) begin
             estado_intensidade <= 3'd0;
-        end else if (s_btn_intensidade_pulse && !flag_funcao_vol && !s_modo_pressed) begin
+        // O LED SÓ muda se o botão Modo NÃO estiver pressionado
+        end else if (s_btn_intensidade_pulse && !s_modo_pressed) begin
             if (estado_intensidade == 3'd4) estado_intensidade <= 3'd0;
             else estado_intensidade <= estado_intensidade + 1'b1;
         end
     end
-
+    
     reg [3:0] s_duty_cycle;
     always @(*) begin
         case (estado_intensidade)
