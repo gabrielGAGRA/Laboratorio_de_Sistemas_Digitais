@@ -74,10 +74,12 @@ module gerador_audio (
     end
 
     // 3. Estágio de Ganho (Multiplicador de Volume)
-    // envelope_val (máx 1000) * nivel_volume (máx 15) = máx 15000.
-    // Deslocar 4 bits para a direita (>> 4) divide por 16. O teto volta para ~937.
-    wire [9:0] volume_final = (envelope_val * nivel_volume) >> 4;
-
+    // Fio de 14 bits evita o overflow na multiplicacao (1000 * 15 = 15000)
+    wire [13:0] calc_ganho = envelope_val * nivel_volume;
+    
+    // Agora sim, reduzimos de volta para a escala de 10 bits do PWM (>> 4)
+    wire [9:0] volume_final = calc_ganho[13:4];
+    
     // 4. Modulação de Alta Frequência (PWM de 50kHz)
     reg [9:0] contador_pwm_hf;
     always @(posedge clock or posedge reset) begin
