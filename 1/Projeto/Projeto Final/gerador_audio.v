@@ -1,27 +1,28 @@
 // ---------------------------------------------------------------------------
 // Modulo: gerador_audio
 // Descricao: Frequencias musicais com Envelope ADSR independente 
-// do estagio de ganho (Volume Master).
+// Ajustado para tempos 2.5x mais longos e transicoes suaves.
 // ---------------------------------------------------------------------------
 module gerador_audio (
     input        clock,       
     input        reset,
     input [17:0] fim_contagem,  
     input        habilitar,     
-    input  [3:0] nivel_volume,  // 0 a 15 (Vem do s_duty_cycle)
+    input  [3:0] nivel_volume,  // 0 a 15
     output       buzzer
 );
 
-    // 1. Geração da Onda Base (A frequência pura)
+    // 1. Geração da Onda Base
     reg [17:0] contador_freq;
     reg        onda_quadrada;
-    wire [17:0] threshold = (fim_contagem >> 3); // Desloca 3 bits: Divide por 8 (12.5%)
+    wire [17:0] threshold = (fim_contagem >> 3); // Duty cycle de 12.5%
 
     always @(posedge clock or posedge reset) begin
         if (reset) begin
             contador_freq <= 18'd0;
             onda_quadrada <= 1'b0;
-        end else if (habilitar) begin
+        end else if (habilitar || envelope_val > 0) begin
+            // Mantem a frequencia rodando enquanto houver som (mesmo no release)
             if (contador_freq >= fim_contagem) contador_freq <= 18'd0;
             else contador_freq <= contador_freq + 1'b1;
             
@@ -32,10 +33,10 @@ module gerador_audio (
         end
     end
 
-    // 2. Gerador de Envelope Normalizado (Sempre de 0 a 1000)
-    // O tempo de decaimento agora é 100% consistente, não importa o volume.
+    // 2. Gerador de Envelope (ADSR)
+    // Tempos multiplicados por 2.5 para maior duracao.
     reg [9:0]  envelope_val;
-    reg [19:0] timer_envelope;
+    reg [19:0] timer_envelope; // 20 bits comportam ate ~1 milhao
     reg        habilitar_antigo;
 
     always @(posedge clock or posedge reset) begin
@@ -46,41 +47,43 @@ module gerador_audio (
         end else begin
             habilitar_antigo <= habilitar;
 
+            // Transicao: Nota ligada (Attack)
             if (habilitar && !habilitar_antigo) begin
-                // ATTACK: Sempre estoura em 1000
                 envelope_val   <= 10'd1000; 
                 timer_envelope <= 20'd0;
             end 
+            // Transicao: Nota desligada (Inicio do Release)
+            else if (!habilitar && habilitar_antigo) begin
+                timer_envelope <= 20'd0; // Reset para consistencia no release
+            end
+            // Estado: Nota Ativa (Decay / Sustain)
             else if (habilitar) begin
-                // DECAY / SUSTAIN
-                timer_envelope <= timer_envelope + 1'b1;
-                if (timer_envelope >= 20'd50_000) begin 
+                if (timer_envelope >= 20'd125_000) begin // 50k * 2.5
                     timer_envelope <= 20'd0;
-                    // Piso do Sustain normalizado em 150
-                    if (envelope_val > 10'd150) 
+                    if (envelope_val > 10'd150) // Piso de Sustain
                         envelope_val <= envelope_val - 1'b1;
+                end else begin
+                    timer_envelope <= timer_envelope + 1'b1;
                 end
             end 
+            // Estado: Nota em Release
             else begin
-                // RELEASE
-                timer_envelope <= timer_envelope + 1'b1;
-                if (timer_envelope >= 20'd10_000) begin
+                if (timer_envelope >= 20'd25_000) begin // 10k * 2.5
                     timer_envelope <= 20'd0;
                     if (envelope_val > 10'd0)
                         envelope_val <= envelope_val - 1'b1;
+                end else begin
+                    timer_envelope <= timer_envelope + 1'b1;
                 end
             end
         end
     end
 
-    // 3. Estágio de Ganho (Multiplicador de Volume)
-    // Fio de 14 bits evita o overflow na multiplicacao (1000 * 15 = 15000)
+    // 3. Estágio de Ganho
     wire [13:0] calc_ganho = envelope_val * nivel_volume;
-    
-    // Agora sim, reduzimos de volta para a escala de 10 bits do PWM (>> 4)
     wire [9:0] volume_final = calc_ganho[13:4];
     
-    // 4. Modulação de Alta Frequência (PWM de 50kHz)
+    // 4. Modulação PWM (50kHz para clock de 50MHz)
     reg [9:0] contador_pwm_hf;
     always @(posedge clock or posedge reset) begin
         if (reset) contador_pwm_hf <= 10'd0;
@@ -88,7 +91,7 @@ module gerador_audio (
         else contador_pwm_hf <= contador_pwm_hf + 1'b1;
     end
 
-    // Saída junta a nota com o envelope atenuado pelo volume
+    // Saida final
     assign buzzer = onda_quadrada & (contador_pwm_hf < volume_final);
 
 endmodule
