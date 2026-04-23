@@ -219,7 +219,7 @@ module fluxo_dados #(
 	 wire [6:0] d_ram29, d_ram30, d_ram31, d_ram32, d_ram33, d_ram34, d_ram35;
 	 wire [6:0] d_ram36, d_ram37, d_ram38;
 
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Au_Clair_de_La_Lune.txt")) mem0 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram0));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Clair_de_Lune.txt")) mem0 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram0));
     sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Axel_F.txt")) mem1 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram1));
     sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Bad_Romance.txt")) mem2 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram2));
     sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Beat_It.txt")) mem3 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram3));
@@ -342,7 +342,7 @@ module fluxo_dados #(
     reg [31:0] ciclos_por_beat;
     always @(*) begin
         case (s_sel_musica)
-            4'd0:  ciclos_por_beat = 39473684; // 76 bpm (Au_Clair_de_La_Lune.txt)
+            4'd0:  ciclos_por_beat = 39473684; // 76 bpm (Clair_de_Lune.txt)
             4'd1:  ciclos_por_beat = 25210084; // 119 bpm (Bad_Romance.txt)
             4'd2:  ciclos_por_beat = 35294117; // 85 bpm (Do_I_Wanna_Know.txt)
             4'd3:  ciclos_por_beat = 30000000; // 100 bpm (Do_Re_Mi_Fa.txt)
