@@ -219,11 +219,11 @@ module fluxo_dados #(
 	 wire [6:0] d_ram29, d_ram30, d_ram31, d_ram32, d_ram33, d_ram34, d_ram35;
 	 wire [6:0] d_ram36, d_ram37, d_ram38;
 
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Clair_de_Lune.txt")) mem0 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram0));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Axel_F.txt")) mem1 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram1));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Bad_Romance.txt")) mem2 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram2));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Beat_It.txt")) mem3 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram3));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Careless_Whisper.txt")) mem4 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram4));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Axel_F.txt")) mem0 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram0));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Bad_Romance.txt")) mem1 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram1));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Beat_It.txt")) mem2 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram2));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Careless_Whisper.txt")) mem3 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram3));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Clair_de_Lune.txt")) mem4 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram4));
     sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Clocks.txt")) mem5 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram5));
     sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Do_I_Wanna_Know.txt")) mem6 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram6));
     sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Do_Re_Mi_Fa.txt")) mem7 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram7));
@@ -342,21 +342,44 @@ module fluxo_dados #(
     reg [31:0] ciclos_por_beat;
     always @(*) begin
         case (s_sel_musica)
-            4'd0:  ciclos_por_beat = 39473684; // 76 bpm (Clair_de_Lune.txt)
+            4'd0:  ciclos_por_beat = 21739130; // 138 bpm (Axel_F.txt)
             4'd1:  ciclos_por_beat = 25210084; // 119 bpm (Bad_Romance.txt)
-            4'd2:  ciclos_por_beat = 35294117; // 85 bpm (Do_I_Wanna_Know.txt)
-            4'd3:  ciclos_por_beat = 30000000; // 100 bpm (Do_Re_Mi_Fa.txt)
-            4'd4:  ciclos_por_beat = 24390243; // 123 bpm (Golden.txt)
-            4'd5:  ciclos_por_beat = 22222222; // 135 bpm (Golden_Wind.txt)
-            4'd6:  ciclos_por_beat = 41095890; // 73 bpm (Harry_Potter.txt)
-            4'd7:  ciclos_por_beat = 30000000; // 100 bpm (Interestelar.txt)
-            4'd8:  ciclos_por_beat = 40540540; // 74 bpm (Minecraft_Sweden.txt)
-            4'd9:  ciclos_por_beat = 35714285; // 84 bpm (Minecraft_Subwoofer_Lullaby.txt)
-            4'd10:  ciclos_por_beat = 19354838; // 155 bpm (Homem_Aranha.txt)
-            4'd11:  ciclos_por_beat = 25000000; // 120 bpm (Undertale_Megalovania.txt)
-            4'd12:  ciclos_por_beat = 25423728; // 118 bpm (Homem_Aranha_1900.txt)
-            4'd13:  ciclos_por_beat = 35714285; // 84 bpm (Take_On_Me.txt)
-            4'd14:  ciclos_por_beat = 21428571; // 140 bpm (Zelda_Lost_Woods.txt)
+            4'd2:  ciclos_por_beat = 25641026; // 117 bpm (Beat_It.txt)
+            4'd3:  ciclos_por_beat = 19607843; // 153 bpm (Careless_Whisper.txt)
+            4'd4:  ciclos_por_beat = 39473684; // 76 bpm (Clair_de_Lune.txt)
+            4'd5:  ciclos_por_beat = 17341040; // 173 bpm (Clocks.txt)
+            4'd6:  ciclos_por_beat = 44117647; // 68 bpm (Do_I_Wanna_Know.txt)
+            4'd7:  ciclos_por_beat = 30000000; // 100 bpm (Do_Re_Mi_Fa.txt)
+            4'd8:  ciclos_por_beat = 26785714; // 112 bpm (Epitafio.txt)
+            4'd9:  ciclos_por_beat = 31250000; // 96 bpm (Fukashigi_No_Carte.txt)
+            4'd10: ciclos_por_beat = 20833333; // 144 bpm (Fur_Elise.txt)
+            4'd11: ciclos_por_beat = 24390243; // 123 bpm (Golden.txt)
+            4'd12: ciclos_por_beat = 22222222; // 135 bpm (Golden_Wind.txt)
+            4'd13: ciclos_por_beat = 41095890; // 73 bpm (Harry_Potter.txt)
+            4'd14: ciclos_por_beat = 31578947; // 95 bpm (Head_Over_Heels.txt)
+            4'd15: ciclos_por_beat = 40540540; // 74 bpm (Hey_Jude.txt)
+            4'd16: ciclos_por_beat = 26785714; // 112 bpm (Homem_Aranha.txt) - Reuso de 112bpm 
+            4'd17: ciclos_por_beat = 25423728; // 118 bpm (Homem_Aranha_1900.txt)
+            4'd18: ciclos_por_beat = 29126214; // 103 bpm (Imperial_March.txt)
+            4'd19: ciclos_por_beat = 30000000; // 100 bpm (Interestelar.txt)
+            4'd20: ciclos_por_beat = 30612245; // 98 bpm (Korobeiniki.txt)
+            4'd22: ciclos_por_beat = 21276596; // 141 bpm (Lugar_Ao_Sol.txt)
+            4'd23: ciclos_por_beat = 30000000; // 100 bpm (Mario.txt)
+            4'd24: ciclos_por_beat = 35714285; // 84 bpm (Minecraft_Subwoofer_Lullaby.txt)
+            4'd25: ciclos_por_beat = 40540540; // 74 bpm (Minecraft_Sweden.txt)
+            4'd26: ciclos_por_beat = 21428571; // 140 bpm (Morning_Flower.txt)
+            4'd27: ciclos_por_beat = 26548673; // 113 bpm (Never_Gonna_Give_You_Up.txt)
+            4'd28: ciclos_por_beat = 27272727; // 110 bpm (Numb.txt)
+            4'd29: ciclos_por_beat = 25862069; // 116 bpm (Pink_Panther.txt)
+            4'd30: ciclos_por_beat = 21428571; // 140 bpm (Sadness_And_Sorrow.txt)
+            4'd31: ciclos_por_beat = 22222222; // 135 bpm (Someone_Like_You.txt)
+            4'd32: ciclos_por_beat = 36144578; // 83 bpm (Star_Wars_Main_Theme.txt)
+            4'd33: ciclos_por_beat = 24000000; // 125 bpm (Sweet_Child_O_Mine.txt)
+            4'd34: ciclos_por_beat = 35714285; // 84 bpm (Take_On_Me.txt)
+            4'd35: ciclos_por_beat = 25000000; // 120 bpm (Undertale_Megalovania.txt)
+            4'd36: ciclos_por_beat = 18518519; // 162 bpm (We_Are_Number_One.txt)
+            4'd37: ciclos_por_beat = 23076923; // 130 bpm (When_Love_Takes_Over.txt)
+            4'd38: ciclos_por_beat = 21428571; // 140 bpm (Zelda_Lost_Woods.txt)
             default: ciclos_por_beat = 30_000_000; // 100 bpm default
         endcase
     end

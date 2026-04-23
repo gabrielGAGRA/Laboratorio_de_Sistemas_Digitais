@@ -76,25 +76,35 @@ module gerador_audio (
                         estado_adsr <= RELEASE;
                         timer_envelope <= 20'd0;
                     end else begin
-                        // Decaimento longo: leva ~3 segundos para sumir
+                        // Decaimento: mantemos o tempo, mas cortamos no limiar de trepidação
                         if (timer_envelope >= 20'd150_000) begin 
                             timer_envelope <= 20'd0;
-                            if (envelope_val > 10'd0) envelope_val <= envelope_val - 1'b1;
-                            else estado_adsr <= IDLE;
+                            // Threshold de 150 para evitar o ruído mecânico do buzzer
+                            if (envelope_val > 10'd150) envelope_val <= envelope_val - 1'b1;
+                            else begin
+                                envelope_val <= 10'd0; // Corte abrupto (Noise Gate)
+                                estado_adsr <= IDLE;
+                            end
                         end else timer_envelope <= timer_envelope + 1'b1;
                     end
                 end
 
                 RELEASE: begin
-                    if (habilitar) begin // Se apertar de novo, volta pro ataque
+                    if (habilitar) begin 
                         estado_adsr <= ATTACK;
                         timer_envelope <= 20'd0;
                     end else begin
-                        // Soltou a tecla: abafador encosta na corda (Release rapido)
+                        // Release otimizado: ~68ms total a 50MHz
                         if (timer_envelope >= 20'd20_000) begin
                             timer_envelope <= 20'd0;
-                            if (envelope_val > 10'd0) envelope_val <= envelope_val - 1'b1;
-                            else estado_adsr <= IDLE;
+                            
+                            // Subtrai de 5 em 5 para uma queda natural, mas rápida
+                            if (envelope_val > 10'd150) begin
+                                envelope_val <= envelope_val - 10'd5;
+                            end else begin
+                                envelope_val <= 10'd0; // Noise gate: corta a trepidação
+                                estado_adsr <= IDLE;
+                            end
                         end else timer_envelope <= timer_envelope + 1'b1;
                     end
                 end
