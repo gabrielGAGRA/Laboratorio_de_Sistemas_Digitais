@@ -41,7 +41,7 @@ module piano_top #(
     wire [4:0] dbg_estado;
     wire [9:0] fd_endereco_ram;
     wire [2:0] fd_id_nota;
-    wire [3:0] s_sel_musica;
+    wire [5:0] s_sel_musica;
     wire [6:0] s_db_botoes;
     wire fd_mudou_modo;
     wire fd_mudou_musica;
@@ -144,7 +144,7 @@ module piano_top #(
 
     // HEX3: Dezena da Música ou Unidade do Volume (sempre 0 ou 5)
     wire [6:0] hex3_normal;
-    wire [4:0] actual_idx = s_sel_musica;
+    wire [5:0] actual_idx = s_sel_musica;
     // Se modo livre (0), apaga display (5'h1F é default apagado). Se for menor que 10, apaga dezena.
     wire [4:0] dez_idx = (fsm_modo_ativo == 2'd0) ? 5'h1F : ((actual_idx / 10) == 0) ? 5'h1F : (actual_idx / 10);
     hexa7seg disp3_inst (.hexa(dez_idx), .display(hex3_normal));
