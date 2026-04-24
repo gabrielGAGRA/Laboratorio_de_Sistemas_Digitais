@@ -225,35 +225,35 @@ module fluxo_dados #(
     sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Careless_Whisper.txt")) mem3 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram3));
     sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Clair_de_Lune.txt")) mem4 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram4));
     sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Clocks.txt")) mem5 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram5));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Moonlight_Sonata_3mvt.txt")) mem6 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram6));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Do_Re_Mi_Fa.txt")) mem7 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram7));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Epitafio.txt")) mem8 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram8));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Fukashigi_No_Carte.txt")) mem9 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram9));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Fur_Elise.txt")) mem10 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram10));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Golden.txt")) mem11 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram11));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Golden_Wind.txt")) mem12 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram12));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Harry_Potter.txt")) mem13 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram13));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Head_Over_Heels.txt")) mem14 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram14));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Hey_Jude.txt")) mem15 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram15));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Trem_Das_Onze.txt")) mem16 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram16));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Homem_Aranha_1900.txt")) mem17 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram17));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Imperial_March.txt")) mem18 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram18));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Interestelar.txt")) mem19 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram19));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Korobeiniki.txt")) mem20 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram20));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Magnetic.txt")) mem21 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram21));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Lugar_Ao_Sol.txt")) mem22 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram22));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Mario.txt")) mem23 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram23));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Radio_Ga_Ga.txt")) mem24 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram24));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Minecraft_Sweden.txt")) mem25 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram25));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Morning_Flower.txt")) mem26 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram26));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Never_Gonna_Give_You_Up.txt")) mem27 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram27));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Numb.txt")) mem28 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram28));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Pink_Panther.txt")) mem29 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram29));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Sadness_And_Sorrow.txt")) mem30 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram30));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Someone_Like_You.txt")) mem31 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram31));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Star_Wars_Main_Theme.txt")) mem32 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram32));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Sweet_Child_O_Mine.txt")) mem33 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram33));
-    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Take_On_Me.txt")) mem34 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram34));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Do_Re_Mi_Fa.txt")) mem6 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram6));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Epitafio.txt")) mem7 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram7));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Fukashigi_No_Carte.txt")) mem8 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram8));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Fur_Elise.txt")) mem9 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram9));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Golden.txt")) mem10 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram10));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Golden_Wind.txt")) mem11 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram11));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Harry_Potter.txt")) mem12 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram12));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Head_Over_Heels.txt")) mem13 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram13));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Hey_Jude.txt")) mem14 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram14));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Homem_Aranha_1900.txt")) mem15 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram15));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Imperial_March.txt")) mem16 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram16));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Interestelar.txt")) mem17 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram17));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Korobeiniki.txt")) mem18 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram18));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Lugar_Ao_Sol.txt")) mem19 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram19));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Magnetic.txt")) mem20 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram20));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Mario.txt")) mem21 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram21));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Minecraft_Sweden.txt")) mem22 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram22));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Moonlight_Sonata_3mvt.txt")) mem23 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram23));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Morning_Flower.txt")) mem24 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram24));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Never_Gonna_Give_You_Up.txt")) mem25 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram25));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Numb.txt")) mem26 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram26));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Pink_Panther.txt")) mem27 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram27));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Radio_Ga_Ga.txt")) mem28 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram28));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Sadness_And_Sorrow.txt")) mem29 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram29));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Someone_Like_You.txt")) mem30 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram30));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Star_Wars_Main_Theme.txt")) mem31 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram31));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Sweet_Child_O_Mine.txt")) mem32 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram32));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Take_On_Me.txt")) mem33 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram33));
+    sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Trem_Das_Onze.txt")) mem34 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram34));
     sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/Undertale_Megalovania.txt")) mem35 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram35));
     sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/We_Are_Number_One.txt")) mem36 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram36));
     sync_rom #(.DATA_WIDTH(7), .ADDR_WIDTH(10), .INIT_FILE("Musicas/When_Love_Takes_Over.txt")) mem37 (.clock(clock), .address(s_endereco_ram), .data_out(d_ram37));
@@ -346,37 +346,37 @@ module fluxo_dados #(
             6'd1:  ciclos_por_beat = 25210084; // 119 bpm (Bad_Romance.txt)
             6'd2:  ciclos_por_beat = 25641026; // 117 bpm (Beat_It.txt)
             6'd3:  ciclos_por_beat = 19607843; // 153 bpm (Careless_Whisper.txt)
-            6'd4:  ciclos_por_beat = 39473684; // 76 bpm (Clair_de_Lune.txt)
+            6'd4:  ciclos_por_beat = 39473684; // 76 bpm  (Clair_de_Lune.txt)
             6'd5:  ciclos_por_beat = 17341040; // 173 bpm (Clocks.txt)
-            6'd6:  ciclos_por_beat = 13636363; // 220 BPM  - ("Moonlight_Sonata_3mvt.txt")
-            6'd7:  ciclos_por_beat = 30000000; // 100 bpm (Do_Re_Mi_Fa.txt)
-            6'd8:  ciclos_por_beat = 26785714; // 112 bpm (Epitafio.txt)
-            6'd9:  ciclos_por_beat = 31250000; // 96 bpm (Fukashigi_No_Carte.txt)
-            6'd10: ciclos_por_beat = 20833333; // 144 bpm (Fur_Elise.txt)
-            6'd11: ciclos_por_beat = 24390243; // 123 bpm (Golden.txt)
-            6'd12: ciclos_por_beat = 22222222; // 135 bpm (Golden_Wind.txt)
-            6'd13: ciclos_por_beat = 41095890; // 73 bpm (Harry_Potter.txt)
-            6'd14: ciclos_por_beat = 31578947; // 95 bpm (Head_Over_Heels.txt)
-            6'd15: ciclos_por_beat = 40540540; // 74 bpm (Hey_Jude.txt)
-            6'd16: ciclos_por_beat = 32608695; // 92 BPM - ("Trem_Das_Onze.txt")
-            6'd17: ciclos_por_beat = 25423728; // 118 bpm (Homem_Aranha_1900.txt)
-            6'd18: ciclos_por_beat = 29126214; // 103 bpm (Imperial_March.txt)
-            6'd19: ciclos_por_beat = 30000000; // 100 bpm (Interestelar.txt)
-            6'd20: ciclos_por_beat = 30612245; // 98 bpm (Korobeiniki.txt)
-            6'd21: ciclos_por_beat = 11450380;  // 524 BPM - ("Magnetic.txt")
-            6'd22: ciclos_por_beat = 21276596; // 141 bpm (Lugar_Ao_Sol.txt)
-            6'd23: ciclos_por_beat = 30000000; // 100 bpm (Mario.txt)
-            6'd24: ciclos_por_beat = 26086956; // 115 BPM  - ("Radio_Ga_Ga.txt")
-            6'd25: ciclos_por_beat = 40540540; // 74 bpm (Minecraft_Sweden.txt)
-            6'd26: ciclos_por_beat = 21428571; // 140 bpm (Morning_Flower.txt)
-            6'd27: ciclos_por_beat = 26548673; // 113 bpm (Never_Gonna_Give_You_Up.txt)
-            6'd28: ciclos_por_beat = 27272727; // 110 bpm (Numb.txt)
-            6'd29: ciclos_por_beat = 25862069; // 116 bpm (Pink_Panther.txt)
-            6'd30: ciclos_por_beat = 21428571; // 140 bpm (Sadness_And_Sorrow.txt)
-            6'd31: ciclos_por_beat = 22222222; // 135 bpm (Someone_Like_You.txt)
-            6'd32: ciclos_por_beat = 36144578; // 83 bpm (Star_Wars_Main_Theme.txt)
-            6'd33: ciclos_por_beat = 24000000; // 125 bpm (Sweet_Child_O_Mine.txt)
-            6'd34: ciclos_por_beat = 35714285; // 84 bpm (Take_On_Me.txt)
+            6'd6:  ciclos_por_beat = 30000000; // 100 bpm (Do_Re_Mi_Fa.txt)
+            6'd7:  ciclos_por_beat = 26785714; // 112 bpm (Epitafio.txt)
+            6'd8:  ciclos_por_beat = 31250000; // 96 bpm  (Fukashigi_No_Carte.txt)
+            6'd9: ciclos_por_beat = 20833333; // 144 bpm (Fur_Elise.txt)
+            6'd10: ciclos_por_beat = 24390243; // 123 bpm (Golden.txt)
+            6'd11: ciclos_por_beat = 22222222; // 135 bpm (Golden_Wind.txt)
+            6'd12: ciclos_por_beat = 41095890; // 73 bpm  (Harry_Potter.txt)
+            6'd13: ciclos_por_beat = 31578947; // 95 bpm  (Head_Over_Heels.txt)
+            6'd14: ciclos_por_beat = 40540540; // 74 bpm  (Hey_Jude.txt)
+            6'd15: ciclos_por_beat = 25423728; // 118 bpm (Homem_Aranha_1900.txt)
+            6'd16: ciclos_por_beat = 29126214; // 103 bpm (Imperial_March.txt)
+            6'd17: ciclos_por_beat = 30000000; // 100 bpm (Interestelar.txt)
+            6'd18: ciclos_por_beat = 30612245; // 98 bpm  (Korobeiniki.txt)
+            6'd19: ciclos_por_beat = 21276596; // 141 bpm (Lugar_Ao_Sol.txt)
+            6'd20: ciclos_por_beat = 11450380; // 524 bpm (Magnetic.txt)
+            6'd21: ciclos_por_beat = 30000000; // 100 bpm (Mario.txt)
+            6'd22: ciclos_por_beat = 40540540; // 74 bpm  (Minecraft_Sweden.txt)
+            6'd23:  ciclos_por_beat = 13636363; // 220 bpm (Moonlight_Sonata_3mvt.txt)
+            6'd24: ciclos_por_beat = 21428571; // 140 bpm (Morning_Flower.txt)
+            6'd25: ciclos_por_beat = 26548673; // 113 bpm (Never_Gonna_Give_You_Up.txt)
+            6'd26: ciclos_por_beat = 27272727; // 110 bpm (Numb.txt)
+            6'd27: ciclos_por_beat = 25862069; // 116 bpm (Pink_Panther.txt)
+            6'd28: ciclos_por_beat = 26086956; // 115 bpm (Radio_Ga_Ga.txt)
+            6'd29: ciclos_por_beat = 21428571; // 140 bpm (Sadness_And_Sorrow.txt)
+            6'd30: ciclos_por_beat = 22222222; // 135 bpm (Someone_Like_You.txt)
+            6'd31: ciclos_por_beat = 36144578; // 83 bpm  (Star_Wars_Main_Theme.txt)
+            6'd32: ciclos_por_beat = 24000000; // 125 bpm (Sweet_Child_O_Mine.txt)
+            6'd33: ciclos_por_beat = 35714285; // 84 bpm  (Take_On_Me.txt)
+            6'd34: ciclos_por_beat = 32608695; // 92 bpm  (Trem_Das_Onze.txt)
             6'd35: ciclos_por_beat = 25000000; // 120 bpm (Undertale_Megalovania.txt)
             6'd36: ciclos_por_beat = 18518519; // 162 bpm (We_Are_Number_One.txt)
             6'd37: ciclos_por_beat = 23076923; // 130 bpm (When_Love_Takes_Over.txt)
